@@ -2,7 +2,7 @@ module Hashtag
   class Lexer
     RULES = [
       [ :NUMBER, /\d+/, ->(n) { n.to_i } ],
-      [ :BINOP, /[\+\-\/\*]/, ->(s) { s } ]
+      [ :BINOP, /[-+\/*]/, ->(s) { s } ]
     ]
 
     attr_accessor :source
