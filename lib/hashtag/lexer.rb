@@ -2,10 +2,9 @@ module Hashtag
   class Lexer
     RULES = [
       [ :NUMBER, /\d+/, ->(n) { n.to_i } ],
-      [ :BINOP, /[-+\/*]/, ->(s) { s } ]
+      [ :NEWLINE, /\n/ ],
+      [ :+, /\+/ ]
     ]
-
-    attr_accessor :source
 
     def initialize(source)
       @source = source
@@ -16,8 +15,9 @@ module Hashtag
       RULES.each do |name, regex, λ|
         match = /^\s*(#{regex})/.match(@unread)
         if match
-          @unread.slice! match[1]
-          return [name, λ[match[1]]]
+          value = match[1]
+          @unread.slice! value
+          return [name, λ ? λ[value] : value]
         end
       end
       nil
