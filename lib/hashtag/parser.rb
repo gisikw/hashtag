@@ -1,52 +1,96 @@
 module Hashtag
   class Parser
+    class ParserError < StandardError; end
     include Ast
 
-    # <Program> ::= <Expression>+
-    # <Expression> ::= <OperatorExpression> "NEWLINE"
-    # <OperatorExpression> ::= <Term> <Operator> <Term>
-    # <Term> ::= <Number>
-    # <Operator> ::= "+"
+    # <Program> ::= <Line>+
+    # <Line> ::= <Expression> NEWLINE
+    # <Expression> ::= <Term> + <Expression>
+    #                | <Term> - <Expression>
+    #                | <Term>
+    # <Term> ::= <Factor> * <Expression>
+    #          | <Factor> / <Expression>
+    #          | <Factor>
+    # <Factor> ::= (<Expression>)
+    #            | Literal
 
     def parse(tokens)
       @tokens = tokens
-      @current = 0
+      @index = 0
       parse_program
+    end
+
+    def current_token
+      @tokens[@index]
+    end
+
+    def chomp(*expected)
+      type, value = current_token
+      if expected.include?(type)
+        @index += 1
+        value
+      end
+    end
+
+    def chomp!(*expected)
+      result = chomp(*expected)
+      type, value = current_token
+      if !result
+        raise ParserError,
+          "Expected #{expected.join(" or ")} token, but saw #{type}"
+      end
+      result
     end
 
     def parse_program
       expressions = []
-      while @current < @tokens.length && expression = parse_expression
+      while current_token && expression = parse_line
         expressions << expression
       end
       Program.new(expressions: expressions)
     end
 
+    def parse_line
+      expression = parse_expression
+      chomp!(:NEWLINE)
+      expression
+    end
+
     def parse_expression
-      val = parse_operator_expression
-      @current += 1 # FIXME: Make it clear we're munching the newline here
-      return val
-    end
-
-    def parse_operator_expression
-      return OperatorExpression.new(
-        left: parse_term,
-        operator: parse_operator,
-        right: parse_term
-      )
-    end
-
-    def parse_term
-      if @tokens[@current][0] == :NUMBER
-        @current += 1
-        return Number.new(value: @tokens[@current - 1][1])
+      term = parse_term
+      type, value = current_token
+      if chomp(:PLUS, :MINUS)
+        BinaryOperation.new(
+          left: term,
+          operator: type,
+          right: parse_expression
+        )
+      else
+        term
       end
     end
 
-    def parse_operator
-      if @tokens[@current][0] == :+
-        @current += 1
-        return Operator.new(op: :+)
+    def parse_term
+      factor = parse_factor
+      type, value = current_token
+      if chomp(:MULT, :DIV)
+        BinaryOperation.new(
+          left: factor,
+          operator: type,
+          right: parse_factor
+        )
+      else
+        factor
+      end
+    end
+
+    def parse_factor
+      if chomp(:LPAREN)
+        expression = parse_expression
+        chomp!(:RPAREN)
+        expression
+      elsif value = chomp(:NUMBER)
+        Literal.new(value: value)
       end
     end
 

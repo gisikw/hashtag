@@ -1,9 +1,14 @@
 module Hashtag
   class Lexer
     RULES = [
-      [ :NUMBER, /\d+/, ->(n) { n.to_i } ],
       [ :NEWLINE, /\n/ ],
-      [ :+, /\+/ ]
+      [ :NUMBER, /\d+/, ->(n) { n.to_i } ],
+      [ :LPAREN, /\(/],
+      [ :RPAREN, /\)/],
+      [ :PLUS, /\+/ ],
+      [ :MINUS, /\-/ ],
+      [ :MULT, /\*/ ],
+      [ :DIV, /\// ]
     ]
 
     def initialize(source)

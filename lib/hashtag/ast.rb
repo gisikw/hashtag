@@ -24,9 +24,9 @@ module Hashtag
         h.each_pair { |k, v| self[k] = v }
       end
     end
+
     class Program < Node.new(:expressions); end
-    class OperatorExpression < Node.new(:left, :operator, :right); end
-    class Number < Node.new(:value); end
-    class Operator < Node.new(:op); end
+    class BinaryOperation < Node.new(:left, :operator, :right); end
+    class Literal < Node.new(:value); end
   end
 end
