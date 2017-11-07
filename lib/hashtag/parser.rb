@@ -1,30 +1,4 @@
 module Hashtag
-
-  # TODO: Move this to its own file
-  module Ast
-    # Make it easier to visualize trees
-    # This shouldn't override inspect. There should be an inspect(tree) =>
-    # pretty_tree method for testing. The initialize shorthand is worthwhile though.
-    class Node < Struct
-      def initialize h
-        h.each_pair do |k, v|
-          self[k] = v if members.map {|x| x.intern}.include? k
-        end
-      end
-      def inspect
-        string = "<#{self.class.name.split("::")[-1]} "
-        fields = self.class.members.map{|field| "#{field}: #{self.send(field)}"}
-        string << fields.join(", ") << ">"
-      end
-      def to_s; inspect; end
-    end
-
-    class Program < Node.new(:expressions); end
-    class OperatorExpression < Node.new(:left, :operator, :right); end
-    class Number < Node.new(:value); end
-    class Operator < Node.new(:op); end
-  end
-
   class Parser
     include Ast
 

@@ -1,4 +1,5 @@
 require "hashtag/version"
+require "hashtag/ast"
 require "hashtag/lexer"
 require "hashtag/parser"
 
