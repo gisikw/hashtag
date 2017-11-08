@@ -5,7 +5,6 @@ class ParserTest < Minitest::Test
 
   def assert_parses_to(code, tree)
     result = Hashtag::Parser.new.parse(Hashtag::Lexer.new(code).tokens)
-    # puts Hashtag::Ast.pretty_print result
     assert_equal tree, result
   end
 
